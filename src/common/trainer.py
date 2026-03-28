@@ -15,6 +15,8 @@ import matplotlib.pyplot as plt
 
 from time import time
 from logging import getLogger
+from dotenv import load_dotenv
+import wandb
 
 from utils.utils import get_local_time, early_stopping, dict2str
 from utils.topk_evaluator import TopKEvaluator
@@ -256,6 +258,9 @@ class Trainer(AbstractTrainer):
                 if post_info is not None:
                     self.logger.info(post_info)
 
+            if wandb.run is not None:
+                wandb.log({"train_loss": self.train_loss_dict[epoch_idx], "epoch": epoch_idx})
+
             # eval: To ensure the test result is the best model under validation data, set self.eval_step == 1
             if (epoch_idx + 1) % self.eval_step == 0:
                 valid_start_time = time()
@@ -269,6 +274,15 @@ class Trainer(AbstractTrainer):
                 valid_result_output = 'valid result: \n' + dict2str(valid_result)
                 # test
                 _, test_result = self._valid_epoch(test_data)
+                
+                if wandb.run is not None:
+                    wandb.log({
+                        "valid_score": valid_score,
+                        **{f"valid_{k}": v for k, v in valid_result.items()},
+                        **{f"test_{k}": v for k, v in test_result.items()},
+                        "epoch": epoch_idx
+                    })
+
                 if verbose:
                     self.logger.info(valid_score_output)
                     self.logger.info(valid_result_output)

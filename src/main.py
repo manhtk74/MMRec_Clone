@@ -9,9 +9,20 @@ Main entry
 
 import os
 import argparse
+import wandb
 from utils.quick_start import quick_start
 os.environ['NUMEXPR_MAX_THREADS'] = '48'
 
+try:
+    from kaggle_secrets import UserSecretsClient
+    user_secrets = UserSecretsClient()
+    wandb_key = user_secrets.get_secret("WANDB_KEY")
+    wandb.login(key=wandb_key)
+    print("Authenticate WandB via Kaggle Secrets.")
+except ImportError:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("Authenticate WandB via .env")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -24,6 +35,18 @@ if __name__ == '__main__':
 
     args, _ = parser.parse_known_args()
 
+    # Init wandb
+    wandb.init(
+        project="MMRec", 
+        name=f"{args.model}-{args.dataset}",
+        config={
+            "model": args.model,
+            "dataset": args.dataset,
+        }
+    )
+
     quick_start(model=args.model, dataset=args.dataset, config_dict=config_dict, save_model=True)
+    
+    wandb.finish()
 
 

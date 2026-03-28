@@ -73,7 +73,7 @@ class LATTICE(GeneralRecommender):
                 image_adj = build_knn_neighbourhood(image_adj, topk=self.knn_k)
                 image_adj = compute_normalized_laplacian(image_adj)
                 torch.save(image_adj, image_adj_file)
-            self.image_original_adj = image_adj.cuda()
+            self.image_original_adj = image_adj.to(self.device)
 
         if self.t_feat is not None:
             self.text_embedding = nn.Embedding.from_pretrained(self.t_feat, freeze=False)
@@ -84,7 +84,7 @@ class LATTICE(GeneralRecommender):
                 text_adj = build_knn_neighbourhood(text_adj, topk=self.knn_k)
                 text_adj = compute_normalized_laplacian(text_adj)
                 torch.save(text_adj, text_adj_file)
-            self.text_original_adj = text_adj.cuda()
+            self.text_original_adj = text_adj.to(self.device)
 
         if self.v_feat is not None:
             self.image_trs = nn.Linear(self.v_feat.shape[1], self.feat_embed_dim)

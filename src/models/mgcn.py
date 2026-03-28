@@ -56,7 +56,7 @@ class MGCN(GeneralRecommender):
                 image_adj = build_knn_normalized_graph(image_adj, topk=self.knn_k, is_sparse=self.sparse,
                                                        norm_type='sym')
                 torch.save(image_adj, image_adj_file)
-            self.image_original_adj = image_adj.cuda()
+            self.image_original_adj = image_adj.to(self.device)
 
         if self.t_feat is not None:
             self.text_embedding = nn.Embedding.from_pretrained(self.t_feat, freeze=False)
@@ -66,7 +66,7 @@ class MGCN(GeneralRecommender):
                 text_adj = build_sim(self.text_embedding.weight.detach())
                 text_adj = build_knn_normalized_graph(text_adj, topk=self.knn_k, is_sparse=self.sparse, norm_type='sym')
                 torch.save(text_adj, text_adj_file)
-            self.text_original_adj = text_adj.cuda()
+            self.text_original_adj = text_adj.to(self.device)
 
         if self.v_feat is not None:
             self.image_trs = nn.Linear(self.v_feat.shape[1], self.embedding_dim)
