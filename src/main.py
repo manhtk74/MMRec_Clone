@@ -30,6 +30,7 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', '-d', type=str, default='baby', help='name of datasets')
     parser.add_argument('--text_encoder', '-te', type=str, default='ST-all-MiniLM-L6-V2', help='text encoder name')
     parser.add_argument('--visual_encoder', '-ve', type=str, default='ViT', help='visual encoder name')
+    parser.add_argument('--augmented', action='store_true', help='used augmented embeddings')
 
     config_dict = {
         'gpu_id': 0,
@@ -38,14 +39,19 @@ if __name__ == '__main__':
     args, _ = parser.parse_known_args()
 
     # Init wandb
+    run_name = f"{args.model}-{args.dataset}-{args.text_encoder}-{args.visual_encoder}"
+    if args.augmented:
+        run_name += "-Augmented"
+
     wandb.init(
         project="MMRec", 
-        name=f"{args.model}-{args.dataset}-{args.text_encoder}-{args.visual_encoder}",
+        name=run_name,
         config={
             "model": args.model,
             "dataset": args.dataset,
             "text_encoder": args.text_encoder,
             "visual_encoder": args.visual_encoder,
+            "augmented": args.augmented,
         }
     )
 
