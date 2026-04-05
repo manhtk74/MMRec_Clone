@@ -67,7 +67,7 @@ if __name__ == 	'__main__':
     print('data path:\t', dataset_path)
     uid_field = config['USER_ID_FIELD']
     iid_field = config['ITEM_ID_FIELD']
-    train_df = pd.read_csv(os.path.join(dataset_path, config['inter_file_name']), sep='\t')
+    train_df = pd.read_csv(os.path.join(dataset_path, config['inter_file_name']), sep=',')
     num_user = len(pd.unique(train_df[uid_field]))
     train_df = train_df[train_df['x_label'] == 0].copy()
     train_data = train_df[[uid_field, iid_field]].to_numpy()
@@ -84,9 +84,9 @@ if __name__ == 	'__main__':
     edge_list_i = []
     edge_list_j = []
 
-    for i in range(num_user):
-        user_num[i] = len(torch.nonzero(user_graph[i]))
-        print("this is ", i, "num", user_num[i])
+    # for i in range(num_user):
+    #     user_num[i] = len(torch.nonzero(user_graph[i]))
+    #     ("this is ", i, "nuprintm", user_num[i])
 
     for i in range(num_user):
         if user_num[i] <= 200:
