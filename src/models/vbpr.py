@@ -104,3 +104,11 @@ class VBPR(GeneralRecommender):
         all_item_e = item_embeddings
         score = torch.matmul(user_e, all_item_e.transpose(0, 1))
         return score
+
+    def get_item_features(self):
+        fused_feat = None
+        if hasattr(self, 'item_raw_features'):
+            fused_feat = self.item_linear(self.item_raw_features)
+        
+        return fused_feat, None
+

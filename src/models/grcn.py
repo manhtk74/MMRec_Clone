@@ -254,7 +254,7 @@ class GRCN(GeneralRecommender):
             t_rep, weight_t = self.t_gcn(edge_index)
             if weight is None:
                 weight = weight_t   
-                conetent_rep = t_rep
+                content_rep = t_rep
             else:
                 content_rep = torch.cat((content_rep,t_rep),dim=1)
                 if self.weight_mode == 'mean':  
@@ -264,11 +264,9 @@ class GRCN(GeneralRecommender):
 
         if self.weight_mode == 'mean':
         	weight = weight/num_modal
-
         elif self.weight_mode == 'max':
         	weight, _ = torch.max(weight, dim=1)
         	weight = weight.view(-1, 1)
-            
         elif self.weight_mode == 'confid':
             confidence = torch.cat((self.model_specific_conf[edge_index[0]], self.model_specific_conf[edge_index[1]]), dim=0)
             weight = weight * confidence
@@ -339,5 +337,17 @@ class GRCN(GeneralRecommender):
         temp_user_tensor = user_tensor[interaction[0], :]
         score_matrix = torch.matmul(temp_user_tensor, item_tensor.t())
         return score_matrix
+
+    def get_item_features(self):
+        import torch.nn.functional as F
+        v_feat, t_feat = None, None
+        if self.v_feat is not None:
+            v_feat = self.v_gcn.MLP(self.v_gcn.features)
+        if self.t_feat is not None:
+            if hasattr(self.t_gcn, 'MLP'):
+                t_feat = self.t_gcn.MLP(self.t_gcn.features)
+            else:
+                t_feat = self.t_gcn.features.weight
+        return v_feat, t_feat
 
 
