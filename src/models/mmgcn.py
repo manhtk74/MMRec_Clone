@@ -48,8 +48,8 @@ class MMGCN(GeneralRecommender):
             self.num_modal += 1
 
         if self.t_feat is not None:
-            self.t_gcn = GCN(self.edge_index, batch_size, num_user, num_item, self.t_feat.size(1), dim_x,
-                             self.aggr_mode, self.concate, num_layer=num_layer, has_id=has_id, device=self.device)
+            self.t_gcn = GCN(self.edge_index, batch_size, num_user, num_item, self.t_feat.size(1), dim_x, self.aggr_mode, 
+                             self.concate, num_layer=num_layer, has_id=has_id, dim_latent=256, device=self.device)
             self.num_modal += 1
 
         self.id_embedding = nn.init.xavier_normal_(torch.rand((num_user+num_item, dim_x), requires_grad=True)).to(self.device)
