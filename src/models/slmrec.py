@@ -477,4 +477,12 @@ class SLMRec(GeneralRecommender):
             print('use the mean adjacency matrix')
 
         return adj_matrix
+        
+    def get_item_features(self):
+        v_feat, t_feat = None, None
+        if self.v_feat is not None:
+            v_feat = self.v_dense(self.v_feat)
+        if self.config["dataset"] != "kwai" and self.t_feat is not None:
+            t_feat = self.t_dense(self.t_feat)
+        return v_feat, t_feat
 

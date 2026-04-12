@@ -94,6 +94,12 @@ class Trainer(AbstractTrainer):
         self.train_loss_dict = dict()
         self.optimizer = self._build_optimizer()
 
+        # Feature Extraction flag
+        self.extract_features = config['extract_features'] if 'extract_features' in config else False
+        self.saved_features_dir = config['saved_features_dir'] if 'saved_features_dir' in config else './embeddings/extracted/'
+        if self.extract_features and not os.path.exists(self.saved_features_dir):
+            os.makedirs(self.saved_features_dir)
+
         #fac = lambda epoch: 0.96 ** (epoch / 50)
         lr_scheduler = config['learning_rate_scheduler']        # check zero?
         fac = lambda epoch: lr_scheduler[0] ** (epoch / lr_scheduler[1])
@@ -222,6 +228,22 @@ class Trainer(AbstractTrainer):
             train_loss_output += 'train loss: %.4f' % losses
         return train_loss_output + ']'
 
+    def _extract_and_save_features(self, stage="epoch_0"):
+        if hasattr(self.model, 'get_item_features'):
+            v_feat, t_feat = self.model.get_item_features()
+            model_name = self.config['model']
+            dataset_name = self.config['dataset']
+            save_path = os.path.join(self.saved_features_dir, f"{model_name}_{dataset_name}_{stage}")
+            if not os.path.exists(save_path):
+                os.makedirs(save_path)
+            if v_feat is not None:
+                np.save(os.path.join(save_path, "v_feat.npy"), v_feat.cpu().detach().numpy())
+            if t_feat is not None:
+                np.save(os.path.join(save_path, "t_feat.npy"), t_feat.cpu().detach().numpy())
+            self.logger.info(f"[*] Extracted and saved item features at {stage} to {save_path}")
+        else:
+            self.logger.warning(f"[!] Model {self.config['model']} does not implement get_item_features. Skipping extraction.")
+
     def fit(self, train_data, valid_data=None, test_data=None, saved=False, verbose=True):
         r"""Train the model based on the train data and the valid data.
 
@@ -236,6 +258,9 @@ class Trainer(AbstractTrainer):
         Returns:
              (float, dict): best valid score and best valid result. If valid_data is None, it returns (-1, None)
         """
+        if getattr(self, 'extract_features', False):
+            self._extract_and_save_features(stage="epoch_0")
+
         for epoch_idx in range(self.start_epoch, self.epochs):
             # train
             training_start_time = time()
@@ -300,6 +325,9 @@ class Trainer(AbstractTrainer):
                     if verbose:
                         self.logger.info(stop_output)
                     break
+        if getattr(self, 'extract_features', False):
+            self._extract_and_save_features(stage="final")
+            
         return self.best_valid_score, self.best_valid_result, self.best_test_upon_valid
 
 

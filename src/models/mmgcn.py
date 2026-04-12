@@ -104,6 +104,14 @@ class MMGCN(GeneralRecommender):
         score_matrix = torch.matmul(temp_user_tensor, item_tensor.t())
         return score_matrix
 
+    def get_item_features(self):
+        v_feat, t_feat = None, None
+        if self.v_feat is not None:
+            v_feat = self.v_gcn.MLP(self.v_feat) if self.v_gcn.dim_latent else self.v_feat
+        if self.t_feat is not None:
+            t_feat = self.t_gcn.MLP(self.t_feat) if self.t_gcn.dim_latent else self.t_feat
+        return v_feat, t_feat
+
 
 class GCN(torch.nn.Module):
     def __init__(self, edge_index, batch_size, num_user, num_item, dim_feat, dim_id, aggr_mode, concate, num_layer,

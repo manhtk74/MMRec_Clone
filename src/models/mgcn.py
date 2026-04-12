@@ -261,3 +261,14 @@ class MGCN(GeneralRecommender):
         # dot with all item embedding to accelerate
         scores = torch.matmul(u_embeddings, restore_item_e.transpose(0, 1))
         return scores
+
+    def get_item_features(self):
+        """
+        Extract item features from MGCN before fusion graph.
+        """
+        v_feat, t_feat = None, None
+        if self.v_feat is not None:
+            v_feat = self.image_trs(self.image_embedding.weight)
+        if self.t_feat is not None:
+            t_feat = self.text_trs(self.text_embedding.weight)
+        return v_feat, t_feat

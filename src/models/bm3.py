@@ -154,3 +154,12 @@ class BM3(GeneralRecommender):
         score_mat_ui = torch.matmul(u_online[user], i_online.transpose(0, 1))
         return score_mat_ui
 
+    def get_item_features(self):
+        v_feat_online, t_feat_online = None, None
+        if self.v_feat is not None:
+            v_feat_online = self.image_trs(self.image_embedding.weight)
+        if self.t_feat is not None:
+            t_feat_online = self.text_trs(self.text_embedding.weight)
+        return v_feat_online, t_feat_online
+
+
